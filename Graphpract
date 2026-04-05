@@ -1,0 +1,38 @@
+import requests
+from bs4 import BeautifulSoup
+import csv
+import matplotlib.pyplot as plt
+
+data = []
+
+for i in range(1, 4):
+    url = f"http://quotes.toscrape.com/page/{i}/"
+    
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    authors = soup.find_all("small", class_="author")
+    quotes = soup.find_all("span", class_="text")
+
+    for author, quote in zip(authors, quotes):
+        data.append((author.text, quote.text))  # tuple use kiya
+
+# 🔥 Duplicate remove
+unique_data = list(set(data))
+
+# CSV save
+with open("quotes_clean.csv", "w", newline="", encoding="utf-8") as file:
+    writer = csv.writer(file)
+    writer.writerow(["Author", "Quote"])
+    writer.writerows(unique_data)
+
+print("CSV saved without duplicates ✅")
+
+# 🔥 Graph (quote length)
+quote_lengths = [len(q[1]) for q in unique_data]
+
+plt.plot(quote_lengths)
+plt.xlabel("Quote Index")
+plt.ylabel("Quote Length")
+plt.title("Quote Length Graph")
+plt.show()
