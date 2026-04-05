@@ -1,0 +1,9 @@
+import datetime
+#practise by inserting your own identity as a part of function 
+
+def sam_processor(data):
+    t = datetime.datetime.now().strftime("%H:%M:%S")
+    return f"|SKJ| [{t}] {data}"
+
+if __name__ == "__main__":
+    print(sam_processor("Test"))
