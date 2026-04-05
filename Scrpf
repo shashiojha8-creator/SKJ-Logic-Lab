@@ -1,0 +1,25 @@
+import requests
+from bs4 import BeautifulSoup
+import csv
+
+def scrape_quotes_to_csv(pages=3, filename="quotes.csv"):
+    data = []
+
+    for i in range(1, pages + 1):
+        url = f"http://quotes.toscrape.com/page/{i}/"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        authors = soup.find_all("small", class_="author")
+        quotes = soup.find_all("span", class_="text")
+
+        for author, quote in zip(authors, quotes):
+            data.append([author.text.strip(), quote.text.strip()])
+
+    # CSV save
+    with open(filename, "w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow(["Author", "Quote"])
+        writer.writerows(data)
+
+    print(f"{filename} saved successfully ✅")
