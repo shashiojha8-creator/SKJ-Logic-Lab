@@ -1,0 +1,4 @@
+.env
+output.json
+output.csv
+pycache/
