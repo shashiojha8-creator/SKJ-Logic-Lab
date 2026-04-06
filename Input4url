@@ -1,0 +1,63 @@
+import threading
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import json
+import logging
+from functools import wraps
+
+# Logger
+logging.basicConfig(filename="pro_scraper.log", level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+# Decorator
+def safe_run(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            logging.error(f"Error in {func.__name__}: {e}")
+            return {"url": args[0] if args else "Unknown", "title": "No Data / Error"}
+    return wrapper
+
+@safe_run
+def fetch_url(url):
+    try:
+        r = requests.get(url, timeout=5)
+        if r.status_code != 200:
+            raise Exception("Request failed")
+        soup = BeautifulSoup(r.text, "html.parser")
+        title = soup.title.string.strip() if soup.title else "No Title"
+        logging.info(f"Fetched {url}")
+        return {"url": url, "title": title}
+    except Exception as e:
+        logging.warning(f"Fetching failed for {url}: {e}")
+        return {"url": url, "title": "No Data / Error"}
+
+@safe_run
+def process_url(url, results):
+    results.append(fetch_url(url))
+    # Save JSON
+    with open("output.json", "w") as jf:
+        json.dump(results, jf, indent=2)
+    # Save CSV + remove duplicates
+    df = pd.DataFrame(results)
+    df.drop_duplicates(inplace=True)
+    df.to_csv("output.csv", index=False)
+    logging.info(f"Processed {url} → CSV + JSON updated")
+    print(f"Processed {url} ✅\nCSV + JSON updated")
+
+def main():
+    results = []
+    while True:
+        url = input("Enter URL (or 'exit' to quit): ").strip()
+        if url.lower() == "exit":
+            break
+        if not url:
+            continue
+        t = threading.Thread(target=process_url, args=(url, results))
+        t.start()
+        t.join()  # wait for thread to finish before next input
+
+if __name__ == "__main__":
+    main()
