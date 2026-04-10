@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>GST Calculator</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #f5f5f5;
+}
+
+.container {
+    max-width: 420px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+h2 {
+    text-align: center;
+}
+
+label {
+    font-weight: bold;
+}
+
+.info-btn {
+    margin-left: 5px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.info-box {
+    display: none;
+    font-size: 12px;
+    background: #f0f8ff;
+    padding: 8px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+}
+
+button {
+    padding: 10px;
+    margin: 5px 3px;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.gst-buttons button {
+    background: #ff9800;
+}
+
+.display-box {
+    margin-top: 15px;
+    padding: 10px;
+    background: #e8f4ff;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.gst-box {
+    margin-top: 15px;
+    padding: 10px;
+    background: #fff3e0;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.small-note {
+    font-size: 12px;
+    text-align: center;
+    color: gray;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>GST Calculator</h2>
+
+<!-- MRP -->
+<label>
+MRP
+<button class="info-btn" onclick="toggleInfo('mrpInfo')">i</button>
+</label>
+<div id="mrpInfo" class="info-box">
+MRP is the maximum retail price set by manufacturer.
+</div>
+<input type="number" id="mrp" placeholder="Enter MRP">
+
+<!-- DISCOUNT -->
+<label>
+Discount %
+<button class="info-btn" onclick="toggleInfo('discountInfo')">i</button>
+</label>
+<div id="discountInfo" class="info-box">
+Discount is the reduction given on MRP before tax calculation.
+</div>
+<input type="number" id="discount" placeholder="Enter Discount %">
+
+<!-- GST -->
+<label>
+GST %
+<button class="info-btn" onclick="toggleInfo('gstInfoBox')">i</button>
+</label>
+<div id="gstInfoBox" class="info-box">
+GST is applied on price after discount (taxable value), not on full MRP.
+</div>
+
+<div class="gst-buttons">
+<button onclick="setGST(5)">5%</button>
+<button onclick="setGST(12)">12%</button>
+<button onclick="setGST(18)">18%</button>
+<button onclick="setGST(28)">28%</button>
+</div>
+
+<input type="number" id="gst" placeholder="Or enter GST %">
+
+<button onclick="calculate()">Calculate</button>
+
+<!-- DISPLAY -->
+<div class="display-box" id="display"></div>
+
+<!-- GST INFO -->
+<div class="gst-box" id="gstInfo"></div>
+
+<p class="small-note">
+GST is always paid by the consumer; discount only reduces taxable amount.
+</p>
+
+</div>
+
+<script>
+
+// toggle info boxes
+function toggleInfo(id) {
+    let box = document.getElementById(id);
+    box.style.display = box.style.display === "block" ? "none" : "block";
+}
+
+// set GST from buttons
+function setGST(val) {
+    document.getElementById("gst").value = val;
+}
+
+// calculation logic
+function calculate() {
+
+    let mrp = Number(document.getElementById("mrp").value) || 0;
+    let discount = Number(document.getElementById("discount").value) || 0;
+    let gst = Number(document.getElementById("gst").value) || 0;
+
+    let discountAmount = (mrp * discount) / 100;
+    let taxable = mrp - discountAmount;
+    let gstAmount = (taxable * gst) / 100;
+    let finalPrice = taxable + gstAmount;
+
+    // DISPLAY SECTION
+    document.getElementById("display").innerHTML = `
+        <b>Calculation Summary</b><br><br>
+        MRP: ₹${mrp.toFixed(2)}<br>
+        Discount: -₹${discountAmount.toFixed(2)}<br>
+        Price After Discount: ₹${taxable.toFixed(2)}<br>
+        GST Amount: +₹${gstAmount.toFixed(2)}<br>
+        <hr>
+        <b>Final Price: ₹${finalPrice.toFixed(2)}</b>
+    `;
+
+    // GST SECTION
+    document.getElementById("gstInfo").innerHTML = `
+        <b>GST Breakdown</b><br><br>
+        Without GST: ₹${taxable.toFixed(2)}<br>
+        With GST: ₹${finalPrice.toFixed(2)}<br>
+    `;
+}
+
+</script>
+
+</body>
+</html>
